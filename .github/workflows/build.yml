@@ -4,8 +4,13 @@ on:
     branches:
       - main
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 env:
   CACHE_URL: s3://nix-squirl-dev?region=us-east-005&endpoint=s3.us-east-005.backblazeb2.com
+  PACKAGES: .#lldb-zig-full .#lldb-zig
 
 jobs:
   build:
@@ -14,16 +19,16 @@ jobs:
       - uses: actions/checkout@v4
       - uses: nixbuild/nix-quick-install-action@v31
       - name: Build packages
-        run: nix build --print-build-logs .#lldb-zig-full .#lldb-zig
+        run: nix build --print-build-logs $PACKAGES
       - name: Sign packages
         run: |
           echo "$NIX_SIGNING_KEY" >signing-key
-          nix store sign --verbose --key-file signing-key .#lldb-zig-full .#lldb-zig
+          nix store sign --verbose --key-file signing-key $PACKAGES
           rm signing-key
         env:
           NIX_SIGNING_KEY: ${{ secrets.NIX_SIGNING_KEY }}
       - name: Upload to binary cache
-        run: nix copy --verbose --to "$CACHE_URL" --all
+        run: nix copy --verbose --to "$CACHE_URL" $PACKAGES
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.B2_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.B2_SECRET_KEY }}
