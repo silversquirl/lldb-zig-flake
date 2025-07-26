@@ -33,9 +33,8 @@
     }
     // flake-utils.lib.eachDefaultSystem (system: let
       pkgs = import nixpkgs {inherit system;};
+      overlayed = self.overlay (pkgs // overlayed) pkgs;
     in {
-      packages =
-        {default = self.packages.${system}.lldb-zig;}
-        // self.overlay pkgs pkgs;
+      packages = {default = self.packages.${system}.lldb-zig;} // overlayed;
     });
 }
