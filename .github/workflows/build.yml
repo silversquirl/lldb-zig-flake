@@ -16,10 +16,30 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
+      - uses: easimon/maximize-build-space@master
+        with:
+          root-reserve-mb: 1024
+          swap-size-mb: 1024
+          remove-dotnet: true
+          remove-android: true
+          remove-haskell: true
+          remove-codeql: true
+          remove-docker-images: true
+          # nix runs builds in /tmp/nix-build-*
+          build-mount-path: /tmp
+
       - uses: actions/checkout@v4
       - uses: nixbuild/nix-quick-install-action@v31
+
+      - name: Report disk usage pre-build
+        run: df -h
+
       - name: Build packages
         run: nix build --print-build-logs $PACKAGES
+
+      - name: Report disk usage post-build
+        run: df -h
+
       - name: Sign packages
         run: |
           echo "$NIX_SIGNING_KEY" >signing-key
@@ -27,6 +47,7 @@ jobs:
           rm signing-key
         env:
           NIX_SIGNING_KEY: ${{ secrets.NIX_SIGNING_KEY }}
+
       - name: Upload to binary cache
         run: nix copy --verbose --to "$CACHE_URL" $PACKAGES
         env:
