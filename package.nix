@@ -14,7 +14,7 @@
   enablePython ? true,
 }:
 stdenv.mkDerivation {
-  name = "lldb-zig";
+  name = "lldb-zig-full";
   meta = {
     description = "A fork of LLDB, for use with the Zig self-hosted backends";
   };
@@ -47,10 +47,4 @@ stdenv.mkDerivation {
   ];
 
   ninjaFlags = ["lldb" "lldb-server"];
-  installPhase = ''
-    runHook preInstall
-    cmake --install . --component lldb
-    cmake --install . --component lldb-server
-    runHook postInstall
-  '';
 }

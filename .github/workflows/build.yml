@@ -1,0 +1,30 @@
+name: Build
+on:
+  push:
+    branches:
+      - main
+
+env:
+  CACHE_URL: s3://nix-squirl-dev?region=us-east-005&endpoint=s3.us-east-005.backblazeb2.com
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: nixbuild/nix-quick-install-action@v31
+      - name: Build packages
+        run: nix build .#lldb-zig-full .#lldb-zig
+      - name: Sign packages
+        run: |
+          echo "$NIX_SIGNING_KEY" >signing-key
+          nix store sign --key-file signing-key .#lldb-zig-full .#lldb-zig
+          rm signing-key
+        env:
+          NIX_SIGNING_KEY: ${{ secrets.NIX_SIGNING_KEY }}
+      - name: Upload to binary cache
+        run: nix copy --to "$CACHE_URL" --all
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.B2_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.B2_SECRET_KEY }}
+
