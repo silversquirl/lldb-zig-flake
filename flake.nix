@@ -3,38 +3,27 @@
 
   inputs = {
     nixpkgs.url = "nixpkgs";
-    flake-utils.url = "github:numtide/flake-utils";
   };
 
   outputs = {
     self,
     nixpkgs,
-    flake-utils,
-  }:
-    {
-      overlay = final: prev: {
-        # The full, non-renamed package
-        lldb-zig-full = final.callPackage ./package.nix {};
-        # A trimmed down package with the binaries renamed to lldb-zig and lldb-zig-server
-        lldb-zig = final.stdenvNoCC.mkDerivation {
-          name = "lldb-zig";
-          meta = {
-            description = "A fork of LLDB, for use with the Zig self-hosted backends";
-            mainCommand = "lldb-zig";
-          };
-          src = final.lldb-zig-full;
-          buildCommand = ''
-            install -m755 -D "$src/bin/lldb" "$out/bin/lldb-zig"
-            install -m755 -D "$src/bin/lldb-server" "$out/bin/lldb-zig-server"
-            install -m644 -Dt "$out/lib" "$src/lib/liblldb.so"*
-          '';
-        };
-      };
-    }
-    // flake-utils.lib.eachDefaultSystem (system: let
-      pkgs = import nixpkgs {inherit system;};
-      overlayed = self.overlay (pkgs // overlayed) pkgs;
+  }: let
+    forSystems = nixpkgs.lib.genAttrs ["aarch64-darwin" "aarch64-linux" "x86_64-darwin" "x86_64-linux"];
+  in {
+    overlay = final: prev: let
+      callPackage = final.lib.callPackageWith final;
     in {
-      packages = {default = self.packages.${system}.lldb-zig;} // overlayed;
-    });
+      lldb-zig-full = callPackage ./package.nix {};
+      lldb-zig = callPackage ./package-trimmed.nix {};
+    };
+
+    packages = forSystems (
+      system: let
+        pkgs = import nixpkgs {inherit system;};
+        packages = self.overlay (pkgs // packages) pkgs;
+      in
+        {default = self.packages.${system}.lldb-zig;} // packages
+    );
+  };
 }

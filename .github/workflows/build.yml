@@ -35,12 +35,14 @@ jobs:
         run: df -h
 
       - name: Build packages
+        working-directory: ci
         run: nix build --print-build-logs $PACKAGES
 
       - name: Report disk usage post-build
         run: df -h
 
       - name: Sign packages
+        working-directory: ci
         run: |
           echo "$NIX_SIGNING_KEY" >signing-key
           nix store sign --verbose --key-file signing-key $PACKAGES
@@ -49,6 +51,7 @@ jobs:
           NIX_SIGNING_KEY: ${{ secrets.NIX_SIGNING_KEY }}
 
       - name: Upload to binary cache
+        working-directory: ci
         run: nix copy --verbose --to "$CACHE_URL" $PACKAGES
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.B2_KEY_ID }}

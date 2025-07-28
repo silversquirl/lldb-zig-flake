@@ -1,3 +1,4 @@
+# The full, non-renamed package
 {
   lib,
   fetchFromGitHub,
