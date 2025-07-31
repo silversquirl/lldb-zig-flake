@@ -47,7 +47,9 @@ jobs:
 
       - name: Load self cache
         if: steps.llvm-cache.outputs.cache-hit != ''
-        run: nix copy --all --from "$LLVM_CACHE$TMP_CACHE_OPTS"
+        run: |
+          nix copy --all --from "$LLVM_CACHE$TMP_CACHE_OPTS"
+          rm -r "$LLVM_CACHE"
 
       - name: Build package
         run: nix copy --print-build-logs .#lldb-zig-full.libllvm --to "$LLVM_CACHE$TMP_CACHE_OPTS"
@@ -90,7 +92,9 @@ jobs:
 
       - name: Load self cache
         if: steps.clang-cache.outputs.cache-hit != ''
-        run: nix copy --all --from "$CLANG_CACHE$TMP_CACHE_OPTS"
+        run: |
+          nix copy --all --from "$CLANG_CACHE$TMP_CACHE_OPTS"
+          rm -r "$CLANG_CACHE"
 
       - name: Build package
         run: nix copy --print-build-logs .#lldb-zig-full.lib{llvm,clang} --to "$CLANG_CACHE$TMP_CACHE_OPTS"
@@ -133,7 +137,9 @@ jobs:
 
       - name: Load self cache
         if: steps.lldb-cache.outputs.cache-hit != ''
-        run: nix copy --all --from "$LLDB_CACHE$TMP_CACHE_OPTS"
+        run: |
+          nix copy --all --from "$LLDB_CACHE$TMP_CACHE_OPTS"
+          rm -r "$LLDB_CACHE"
 
       - name: Build package
         run: nix copy --print-build-logs .#lldb-zig-full --to "$LLDB_CACHE$TMP_CACHE_OPTS"
