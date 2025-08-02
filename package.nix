@@ -15,6 +15,7 @@
 }: let
   llvmPackages =
     (mkLLVMPackages {
+      name = "21.1.0-rc1"; # use compatible tblgen
       version = llvmVersion;
       gitRelease = {rev-version = llvmVersion;};
       inherit monorepoSrc;
