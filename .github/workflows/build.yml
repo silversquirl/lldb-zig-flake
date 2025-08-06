@@ -47,7 +47,7 @@ jobs:
       - name: Load self cache
         if: steps.tools-cache.outputs.cache-hit != ''
         run: |
-          nix copy --all --from "file://$TOOLS_CACHE$TMP_CACHE_OPTS"
+          nix copy --all --no-check-sigs --from "file://$TOOLS_CACHE$TMP_CACHE_OPTS"
           rm -r "$TOOLS_CACHE"
 
       - name: Build package
@@ -88,12 +88,12 @@ jobs:
             ${{runner.os}}-libllvm-
 
       - name: Load previous cache
-        run: nix copy --all --from "file://$TOOLS_CACHE$TMP_CACHE_OPTS"
+        run: nix copy --all --no-check-sigs --from "file://$TOOLS_CACHE$TMP_CACHE_OPTS"
 
       - name: Load self cache
         if: steps.llvm-cache.outputs.cache-hit != ''
         run: |
-          nix copy --all --from "file://$LLVM_CACHE$TMP_CACHE_OPTS"
+          nix copy --all --no-check-sigs --from "file://$LLVM_CACHE$TMP_CACHE_OPTS"
           rm -r "$LLVM_CACHE"
 
       - name: Build package
@@ -132,12 +132,12 @@ jobs:
           restore-keys: ${{runner.os}}-libclang-
 
       - name: Load previous cache
-        run: nix copy --all --from "file://$LLVM_CACHE$TMP_CACHE_OPTS"
+        run: nix copy --all --no-check-sigs --from "file://$LLVM_CACHE$TMP_CACHE_OPTS"
 
       - name: Load self cache
         if: steps.clang-cache.outputs.cache-hit != ''
         run: |
-          nix copy --all --from "file://$CLANG_CACHE$TMP_CACHE_OPTS"
+          nix copy --all --no-check-sigs --from "file://$CLANG_CACHE$TMP_CACHE_OPTS"
           rm -r "$CLANG_CACHE"
 
       - name: Build package
@@ -176,12 +176,12 @@ jobs:
           restore-keys: ${{runner.os}}-lldb-zig-full-
 
       - name: Load previous cache
-        run: nix copy --all --from "file://$CLANG_CACHE$TMP_CACHE_OPTS"
+        run: nix copy --all --no-check-sigs --from "file://$CLANG_CACHE$TMP_CACHE_OPTS"
 
       - name: Load self cache
         if: steps.lldb-cache.outputs.cache-hit != ''
         run: |
-          nix copy --all --from "file://$LLDB_CACHE$TMP_CACHE_OPTS"
+          nix copy --all --no-check-sigs --from "file://$LLDB_CACHE$TMP_CACHE_OPTS"
           rm -r "$LLDB_CACHE"
 
       - name: Build package
@@ -223,7 +223,7 @@ jobs:
           key: ${{runner.os}}-lldb-zig-full-${{github.run_id}}-${{github.run_attempt}}
 
       - name: Load previous cache
-        run: nix copy --all --from "file://$LLDB_CACHE$TMP_CACHE_OPTS"
+        run: nix copy --all --no-check-sigs --from "file://$LLDB_CACHE$TMP_CACHE_OPTS"
 
       - name: Build package
         run: nix build --print-build-logs .#lldb-zig
