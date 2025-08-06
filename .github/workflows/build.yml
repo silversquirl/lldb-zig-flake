@@ -12,10 +12,10 @@ env:
   CACHE_URL: s3://nix-squirl-dev?region=us-east-005&endpoint=s3.us-east-005.backblazeb2.com
 
   TMP_CACHE_OPTS: ?compression-level=0&parallel-compression=true
-  TOOLS_CACHE: file:///tmp/nix-bincache-llvm-tools
-  LLVM_CACHE: file:///tmp/nix-bincache-libllvm
-  CLANG_CACHE: file:///tmp/nix-bincache-libclang
-  LLDB_CACHE: file:///tmp/nix-bincache-lldb-zig-full
+  TOOLS_CACHE: /tmp/nix-bincache-llvm-tools
+  LLVM_CACHE: /tmp/nix-bincache-libllvm
+  CLANG_CACHE: /tmp/nix-bincache-libclang
+  LLDB_CACHE: /tmp/nix-bincache-lldb-zig-full
 
 jobs:
   build-tools:
@@ -47,11 +47,11 @@ jobs:
       - name: Load self cache
         if: steps.tools-cache.outputs.cache-hit != ''
         run: |
-          nix copy --all --from "$TOOLS_CACHE$TMP_CACHE_OPTS"
+          nix copy --all --from "file://$TOOLS_CACHE$TMP_CACHE_OPTS"
           rm -r "$TOOLS_CACHE"
 
       - name: Build package
-        run: nix copy --print-build-logs .#lldb-zig-full.tools.tblgen --to "$TOOLS_CACHE$TMP_CACHE_OPTS"
+        run: nix copy --print-build-logs .#lldb-zig-full.tools.tblgen --to "file://$TOOLS_CACHE$TMP_CACHE_OPTS"
 
   build-libllvm:
     name: Build libLLVM
@@ -88,16 +88,16 @@ jobs:
             ${{runner.os}}-libllvm-
 
       - name: Load previous cache
-        run: nix copy --all --from "$TOOLS_CACHE$TMP_CACHE_OPTS"
+        run: nix copy --all --from "file://$TOOLS_CACHE$TMP_CACHE_OPTS"
 
       - name: Load self cache
         if: steps.llvm-cache.outputs.cache-hit != ''
         run: |
-          nix copy --all --from "$LLVM_CACHE$TMP_CACHE_OPTS"
+          nix copy --all --from "file://$LLVM_CACHE$TMP_CACHE_OPTS"
           rm -r "$LLVM_CACHE"
 
       - name: Build package
-        run: nix copy --print-build-logs .#lldb-zig-full.libllvm --to "$LLVM_CACHE$TMP_CACHE_OPTS"
+        run: nix copy --print-build-logs .#lldb-zig-full.libllvm --to "file://$LLVM_CACHE$TMP_CACHE_OPTS"
 
   build-libclang:
     name: Build libclang
@@ -132,16 +132,16 @@ jobs:
           restore-keys: ${{runner.os}}-libclang-
 
       - name: Load previous cache
-        run: nix copy --all --from "$LLVM_CACHE$TMP_CACHE_OPTS"
+        run: nix copy --all --from "file://$LLVM_CACHE$TMP_CACHE_OPTS"
 
       - name: Load self cache
         if: steps.clang-cache.outputs.cache-hit != ''
         run: |
-          nix copy --all --from "$CLANG_CACHE$TMP_CACHE_OPTS"
+          nix copy --all --from "file://$CLANG_CACHE$TMP_CACHE_OPTS"
           rm -r "$CLANG_CACHE"
 
       - name: Build package
-        run: nix copy --print-build-logs .#lldb-zig-full.lib{llvm,clang} --to "$CLANG_CACHE$TMP_CACHE_OPTS"
+        run: nix copy --print-build-logs .#lldb-zig-full.lib{llvm,clang} --to "file://$CLANG_CACHE$TMP_CACHE_OPTS"
 
   build-full:
     name: Build lldb-zig-full
@@ -176,16 +176,16 @@ jobs:
           restore-keys: ${{runner.os}}-lldb-zig-full-
 
       - name: Load previous cache
-        run: nix copy --all --from "$CLANG_CACHE$TMP_CACHE_OPTS"
+        run: nix copy --all --from "file://$CLANG_CACHE$TMP_CACHE_OPTS"
 
       - name: Load self cache
         if: steps.lldb-cache.outputs.cache-hit != ''
         run: |
-          nix copy --all --from "$LLDB_CACHE$TMP_CACHE_OPTS"
+          nix copy --all --from "file://$LLDB_CACHE$TMP_CACHE_OPTS"
           rm -r "$LLDB_CACHE"
 
       - name: Build package
-        run: nix copy --print-build-logs .#lldb-zig-full --to "$LLDB_CACHE$TMP_CACHE_OPTS"
+        run: nix copy --print-build-logs .#lldb-zig-full --to "file://$LLDB_CACHE$TMP_CACHE_OPTS"
 
   final:
     name: Build lldb-zig and upload to binary cache
@@ -223,7 +223,7 @@ jobs:
           key: ${{runner.os}}-lldb-zig-full-${{github.run_id}}-${{github.run_attempt}}
 
       - name: Load previous cache
-        run: nix copy --all --from "$LLDB_CACHE$TMP_CACHE_OPTS"
+        run: nix copy --all --from "file://$LLDB_CACHE$TMP_CACHE_OPTS"
 
       - name: Build package
         run: nix build --print-build-logs .#lldb-zig
