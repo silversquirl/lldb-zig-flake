@@ -14,14 +14,16 @@
   llvmVersion ? "21.0.0-lldb-zig",
 }: let
   llvmPackages =
-    (mkLLVMPackages {
-      name = "21"; # use compatible tblgen
-      version = llvmVersion;
-      gitRelease = {rev-version = llvmVersion;};
-      inherit monorepoSrc;
-    }).value;
+    (mkLLVMPackages.override {
+        # FIXME: this may cause cross-compilation issues
+        buildLlvmTools = llvmPackages.tools;
+      } {
+        version = llvmVersion;
+        gitRelease = {rev-version = llvmVersion;};
+        inherit monorepoSrc;
+      }).value;
 in
   llvmPackages.lldb.override {
     devExtraCmakeFlags = [(lib.cmakeBool "LLVM_ENABLE_ASSERTIONS" enableAssertions)];
   }
-  // {inherit (llvmPackages) libclang libllvm;}
+  // {inherit (llvmPackages) libclang libllvm tools;}
