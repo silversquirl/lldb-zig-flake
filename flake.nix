@@ -14,7 +14,7 @@
     overlay = final: prev: let
       callPackage = final.lib.callPackageWith final;
     in {
-      lldb-zig-full = callPackage ./package.nix {};
+      llvmPackages_lldb-zig = callPackage ./package.nix {};
       lldb-zig = callPackage ./package-trimmed.nix {};
     };
 

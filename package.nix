@@ -1,9 +1,7 @@
 # The full, non-renamed package
 {
-  lib,
   fetchFromGitHub,
   mkLLVMPackages,
-  enableAssertions ? true,
   monorepoSrc ?
     fetchFromGitHub {
       owner = "jacobly0";
@@ -23,7 +21,4 @@
         inherit monorepoSrc;
       }).value;
 in
-  llvmPackages.lldb.override {
-    devExtraCmakeFlags = [(lib.cmakeBool "LLVM_ENABLE_ASSERTIONS" enableAssertions)];
-  }
-  // {inherit (llvmPackages) libclang libllvm tools;}
+  llvmPackages
