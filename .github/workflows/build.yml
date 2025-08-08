@@ -101,7 +101,7 @@ jobs:
       - run: ls /nix/store
 
       - name: Build package
-        run: nix copy --print-build-logs .#lldb-zig-full.libllvm --to "file://$LLVM_CACHE$TMP_CACHE_OPTS"
+        run: nix copy --print-build-logs .#lldb-zig-full.{libllvm,tools.tblgen} --to "file://$LLVM_CACHE$TMP_CACHE_OPTS"
 
   build-libclang:
     name: Build libclang
@@ -135,6 +135,7 @@ jobs:
           key: ${{runner.os}}-libclang-${{github.run_id}}-${{github.run_attempt}}
           restore-keys: ${{runner.os}}-libclang-
 
+      - run: ls /nix/store
       - name: Load previous cache
         run: nix copy --all --no-check-sigs --from "file://$LLVM_CACHE$TMP_CACHE_OPTS"
 
@@ -143,6 +144,7 @@ jobs:
         run: |
           nix copy --all --no-check-sigs --from "file://$CLANG_CACHE$TMP_CACHE_OPTS"
           rm -r "$CLANG_CACHE"
+      - run: ls /nix/store
 
       - name: Build package
         run: nix copy --print-build-logs .#lldb-zig-full.lib{llvm,clang} --to "file://$CLANG_CACHE$TMP_CACHE_OPTS"
