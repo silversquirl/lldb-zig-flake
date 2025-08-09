@@ -85,7 +85,7 @@ jobs:
           rm -r "$LLVM_CACHE"
 
       - name: Build package
-        run: nix copy --print-build-logs .#llvmPackages_lldb-zig.{llvm,tools.tblgen} --to "file://$LLVM_CACHE$TMP_CACHE_OPTS"
+        run: nix copy --print-build-logs .#llvmPackages_lldb-zig.{llvm.dev,tools.tblgen} --to "file://$LLVM_CACHE$TMP_CACHE_OPTS"
 
   build-libclang:
     name: Build libclang
@@ -129,7 +129,7 @@ jobs:
           rm -r "$CLANG_CACHE"
 
       - name: Build package
-        run: nix copy --print-build-logs .#llvmPackages_lldb-zig.lib{llvm,clang} --to "file://$CLANG_CACHE$TMP_CACHE_OPTS"
+        run: nix copy --print-build-logs .#llvmPackages_lldb-zig.{llvm.dev,clang.dev} --to "file://$CLANG_CACHE$TMP_CACHE_OPTS"
 
   build-full:
     name: Build lldb
